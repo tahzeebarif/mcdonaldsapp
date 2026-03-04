@@ -79,7 +79,7 @@
   </div>
 </nav>
 
-<!-- HERO -->
+
 <div class="relative w-full overflow-visible"
      style="background: linear-gradient(115deg, #11112a 0%, #1a1a3e 55%, #25183a 100%);">
   <div class="absolute inset-0 pointer-events-none"
@@ -119,7 +119,7 @@
   </div>
 </div>
 
-<!-- SUBTITLE + SEARCH -->
+
 <div class="bg-white px-8 py-3 flex items-center justify-between border-b border-gray-100">
   <h2 class="text-sm font-bold text-gray-900">All Offers from McDonald's East London</h2>
   <div class="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-1.5 bg-white w-52">
@@ -129,7 +129,7 @@
   </div>
 </div>
 
-<!-- CATEGORY BAR -->
+
 <div class="cat-bar bg-orange flex items-center px-6 overflow-x-auto gap-1">
   <button class="cat-btn bg-white text-orange rounded-full px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all" onclick="filterCat('all',this)">Offers</button>
   <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('burgers',this)">Burgers</button>
@@ -144,12 +144,12 @@
   <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('orbit',this)">Orbit®</button>
 </div>
 
-<!-- MAIN -->
+
 <div class="max-w-5xl mx-auto px-4 pt-6">
 
   <div id="products-container"></div>
 
-  <!-- DELIVERY / CONTACT / OPERATIONAL -->
+  
   <div class="grid grid-cols-1 md:grid-cols-3 bg-white rounded-2xl overflow-hidden shadow-md my-8">
     <div class="p-6 border-r border-gray-100">
       <div class="flex items-center gap-2 font-bold text-sm mb-4 text-gray-900">
@@ -195,9 +195,7 @@
       </div>
     </div>
   </div>
-
-  <!-- KNOW MORE ABOUT US -->
-  <div class="bg-white rounded-2xl p-7 mb-8 shadow-md">
+<div class="bg-white rounded-2xl p-7 mb-8 shadow-md">
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
       <h2 class="nunito font-black text-xl text-gray-900">Know more about us!</h2>
       <div class="flex gap-1 bg-gray-100 rounded-full p-1">
@@ -215,9 +213,7 @@
       </div>
     </div>
   </div>
-
-  <!-- CUSTOMER REVIEWS -->
-  <div class="py-6 pb-5">
+<div class="py-6 pb-5">
     <div class="flex items-center justify-between mb-6">
       <h2 class="nunito text-2xl font-black text-gray-900">Customer Reviews</h2>
       <div class="flex gap-2">
@@ -235,7 +231,7 @@
     </div>
   </div>
 
-  <!-- SIMILAR RESTAURANTS -->
+  
   <div class="pb-10">
     <h2 class="nunito text-2xl font-black text-gray-900 mb-5">Similar Restaurants</h2>
     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
@@ -286,8 +282,6 @@
   </div>
 
 </div>
-
-<!-- FOOTER -->
 <footer class="bg-gray-100 pt-10 pb-0">
   <div class="max-w-6xl mx-auto px-6 pb-10 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-300">
     <div class="flex flex-col gap-4">
@@ -416,11 +410,10 @@ const faqData = [
     ], desc:"Order.UK currently covers major UK cities including London, Manchester, Birmingham and more. We're expanding rapidly — enter your postcode on the app to check." },
 ];
 
-/* ─── STATE ─────────────────────────────────────────── */
 let cart={}, currentCat='all', searchQ='', revIdx=0, activeFaq=0;
 const typeLabel={burgers:"Burgers",fries:"Fries",snacks:"Snacks",salads:"Salads",cold_drinks:"Cold Drinks",happy_meal:"Happy Meal®",desserts:"Desserts",hot_drinks:"Hot Drinks",sauces:"Sauces",orbit:"Orbit®"};
 
-/* ─── PRODUCTS ──────────────────────────────────────── */
+
 function renderProducts(){
   const container=document.getElementById('products-container');
   const filtered=products.filter(p=>{
@@ -465,7 +458,6 @@ function filterCat(cat,btn){
 }
 function searchProducts(){searchQ=document.getElementById('search-input').value.toLowerCase();renderProducts();}
 
-/* ─── CART ──────────────────────────────────────────── */
 function addToCart(id){
   cart[id]=(cart[id]||0)+1;
   updateBadge();
@@ -511,7 +503,6 @@ function renderCartPanel(){
   footer.classList.remove('hidden');
 }
 
-/* ─── REVIEWS ───────────────────────────────────────── */
 function renderReviews(){
   document.getElementById('rev-track').innerHTML=reviews.map(r=>`
     <div class="bg-white rounded-xl p-4 shadow-sm flex-shrink-0 flex flex-col gap-2 border border-gray-100"
@@ -549,7 +540,6 @@ setInterval(()=>{
   track.style.transform=`translateX(-${(card.offsetWidth+16)*revIdx}px)`;
 },5000);
 
-/* ─── FAQ ────────────────────────────────────────────── */
 function renderFaqList(){
   document.getElementById('faq-list').innerHTML=faqData.map((f,i)=>`
     <div onclick="setFaq(${i})" class="px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${i===activeFaq?'bg-orange text-white':'text-gray-300 hover:bg-white/10 hover:text-white'}">
@@ -572,12 +562,10 @@ function switchTab(btn){
   btn.classList.add('bg-white','text-gray-900','shadow-sm');btn.classList.remove('text-gray-500');
 }
 
-/* ─── INIT ───────────────────────────────────────────── */
 renderProducts();
 renderReviews();
 renderFaqList();
 renderFaqSteps();
-// NOTE: renderSimilar() intentionally removed — similar restaurants use static HTML img tags
 </script>
 </body>
 </html>
