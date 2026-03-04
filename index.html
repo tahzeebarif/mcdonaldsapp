@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OrderEats – McDonald's East London</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          orange:        '#FF6B00',
+          'orange-dark': '#d95a00',
+          'dark-navy':   '#1a1a2e',
+          'dark-navy2':  '#1a1a3e',
+          navy:          '#1a1a2e',
+          amber:         '#FFC107',
+        },
+        fontFamily: {
+          nunito: ['Nunito','sans-serif'],
+          poppins:['Poppins','sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family:'Poppins',sans-serif; }
+  .nunito { font-family:'Nunito',sans-serif; }
+  .cat-bar::-webkit-scrollbar { height:3px; }
+  .cat-bar::-webkit-scrollbar-thumb { background:rgba(255,255,255,.4); border-radius:2px; }
+  .rev-track { display:flex; gap:16px; transition:transform .4s ease; }
+  @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+  .cart-panel { animation:slideIn .22s ease; }
+</style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div id="cart-overlay"
+     class="hidden fixed inset-0 z-[999] bg-black/50 items-start justify-end"
+     onclick="outsideClose(event)">
+  <div class="cart-panel bg-white h-full w-80 shadow-2xl flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-900">
+      <h2 class="nunito font-black text-lg text-white">Your Cart</h2>
+      <button onclick="toggleCart()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+    </div>
+    <div id="cart-items-wrap" class="flex-1 overflow-y-auto px-5 py-3"></div>
+    <div id="cp-footer" class="hidden border-t border-gray-100 px-5 py-4 bg-gray-50">
+      <div class="flex justify-between items-center mb-3">
+        <span class="font-semibold text-sm text-gray-700">Total</span>
+        <span id="cart-total" class="font-black text-lg text-orange">£0.00</span>
+      </div>
+      <button class="w-full bg-orange hover:bg-orange-dark text-white font-bold text-sm py-3 rounded-xl transition-colors">
+        Proceed to Checkout
+      </button>
+    </div>
+  </div>
+</div>
+
+<nav class="bg-white sticky top-0 z-50 shadow-sm flex items-center justify-between px-8 h-14">
+  <a href="#" class="flex items-center gap-1 nunito font-black text-xl text-gray-900 no-underline">
+    <img src="images/LOGO 1.png" alt="logo" class="h-8 w-auto object-contain"/>
+  </a>
+  <ul class="hidden md:flex gap-8 list-none m-0 p-0">
+    <li><a href="#" class="text-gray-500 text-sm font-medium hover:text-orange transition-colors no-underline">Home</a></li>
+    <li><a href="#" class="text-gray-500 text-sm font-medium hover:text-orange transition-colors no-underline">Special Offers</a></li>
+    <li><a href="#" class="bg-orange text-white px-4 py-1.5 rounded-full text-sm font-semibold no-underline">Restaurants</a></li>
+    <li><a href="#" class="text-gray-500 text-sm font-medium hover:text-orange transition-colors no-underline">Track Order</a></li>
+  </ul>
+  <div class="flex items-center gap-2 cursor-pointer" onclick="toggleCart()">
+    <div class="relative">
+      <div class="w-9 h-9 border-2 border-gray-200 rounded-full flex items-center justify-center bg-black">
+        <img src="images/shopping_cart_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24 1.png" alt="cart" class="w-5 h-5 object-contain"/>
+      </div>
+      <span id="cart-count" class="absolute -top-1 -right-1 bg-orange text-white text-xs font-black w-4 h-4 rounded-full flex items-center justify-center">0</span>
+    </div>
+    <span class="text-sm font-semibold hidden sm:block">Cart</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="relative w-full overflow-visible"
+     style="background: linear-gradient(115deg, #11112a 0%, #1a1a3e 55%, #25183a 100%);">
+  <div class="absolute inset-0 pointer-events-none"
+       style="background: radial-gradient(ellipse at 75% 50%, rgba(255,107,0,0.2) 0%, transparent 60%)"></div>
+  <div class="relative max-w-6xl mx-auto flex items-center justify-between px-10 py-10 gap-6">
+    <div class="flex-1 z-10 min-w-0">
+      <p class="text-gray-400 text-xs italic mb-1">I'm lovin' it!</p>
+      <h1 class="nunito text-[2rem] font-black text-white leading-tight mb-5">McDonald's East London</h1>
+      <div class="flex flex-wrap gap-2 mb-5">
+        <div class="flex items-center gap-2 bg-white/10 border border-white/20 text-white rounded-full px-4 py-1.5 text-xs font-semibold">
+          <svg class="w-3.5 h-3.5 opacity-80 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/>
+          </svg>
+          Minimum Order: 12 GBP
+        </div>
+        <div class="flex items-center gap-2 bg-white/10 border border-white/20 text-white rounded-full px-4 py-1.5 text-xs font-semibold">
+          <svg class="w-3.5 h-3.5 opacity-80 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/>
+            <path d="M5.5 17.5 L10 10 L15 10 L18.5 17.5"/><path d="M10 10 L12 6 L16 6"/>
+          </svg>
+          Delivery in 20–25 Minutes
+        </div>
+      </div>
+      <div class="inline-flex items-center gap-2 bg-orange text-white rounded-full px-4 py-1.5 text-xs font-bold">
+        <span class="w-2 h-2 bg-white rounded-full"></span>
+        Open until 3:00 AM
+      </div>
+    </div>
+    <div class="relative z-10 shrink-0" style="width:260px; height:170px;">
+      <div class="absolute right-0 top-0 rounded-2xl overflow-hidden border border-white/10 shadow-2xl" style="width:240px; height:160px;">
+        <img src="images/Rectangle 44.png" alt="McDonald's food" class="w-full h-full object-cover"/>
+      </div>
+      <div class="absolute z-20 rounded-xl overflow-hidden shadow-2xl" style="bottom:-10px; left:0px; width:100px;">
+        <img src="images/Rectangle 64 (2).png" alt="3.4 rating" class="w-full h-auto block"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUBTITLE + SEARCH -->
+<div class="bg-white px-8 py-3 flex items-center justify-between border-b border-gray-100">
+  <h2 class="text-sm font-bold text-gray-900">All Offers from McDonald's East London</h2>
+  <div class="flex items-center gap-2 border border-gray-200 rounded-full px-4 py-1.5 bg-white w-52">
+    <img src="images/Search More.png" alt="search" class="w-3.5 h-3.5 opacity-40"/>
+    <input type="text" placeholder="Search from menu..." id="search-input" oninput="searchProducts()"
+           class="border-none outline-none text-xs text-gray-600 placeholder-gray-600 w-full bg-transparent"/>
+  </div>
+</div>
+
+<!-- CATEGORY BAR -->
+<div class="cat-bar bg-orange flex items-center px-6 overflow-x-auto gap-1">
+  <button class="cat-btn bg-white text-orange rounded-full px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-all" onclick="filterCat('all',this)">Offers</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('burgers',this)">Burgers</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('fries',this)">Fries</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('snacks',this)">Snacks</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('salads',this)">Salads</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('cold_drinks',this)">Cold drinks</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('happy_meal',this)">Happy Meal®</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('desserts',this)">Desserts</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('hot_drinks',this)">Hot drinks</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('sauces',this)">Sauces</button>
+  <button class="cat-btn text-white/80 rounded-full px-5 py-2.5 text-xs font-semibold whitespace-nowrap hover:bg-white/20 transition-all" onclick="filterCat('orbit',this)">Orbit®</button>
+</div>
+
+<!-- MAIN -->
+<div class="max-w-5xl mx-auto px-4 pt-6">
+
+  <div id="products-container"></div>
+
+  <!-- DELIVERY / CONTACT / OPERATIONAL -->
+  <div class="grid grid-cols-1 md:grid-cols-3 bg-white rounded-2xl overflow-hidden shadow-md my-8">
+    <div class="p-6 border-r border-gray-100">
+      <div class="flex items-center gap-2 font-bold text-sm mb-4 text-gray-900">
+        <img src="images/Tracking.png" alt="" class="w-5 h-5 opacity-70"/> Delivery information
+      </div>
+      <div class="space-y-1.5 text-xs text-gray-500">
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Monday:</span><span>12:00 AM–3:00 AM, 8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Tuesday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Wednesday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Thursday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Friday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Saturday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-gray-700">Sunday:</span><span>8:00 AM–12:00 AM</span></div>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">Estimated time until delivery: 20 min</p>
+    </div>
+    <div class="p-6 border-r border-gray-100">
+      <div class="flex items-center gap-2 font-bold text-sm mb-4 text-gray-900">
+        <img src="images/ID Verified.png" alt="" class="w-5 h-5 opacity-70"/> Contact information
+      </div>
+      <p class="text-xs text-gray-500 leading-relaxed mb-4">If you have allergies or other dietary restrictions, please contact the restaurant. The restaurant will provide food-specific information upon request.</p>
+      <div class="mb-3">
+        <p class="text-xs text-gray-400 mb-0.5">Phone number</p>
+        <p class="text-sm font-semibold text-gray-800">+934443-43</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 mb-0.5">Website</p>
+        <a href="http://mcdonalds.uk/" target="_blank" class="text-orange text-xs font-medium">http://mcdonalds.uk/</a>
+      </div>
+    </div>
+    <div class="p-6 bg-dark-navy">
+      <div class="flex items-center gap-2 font-bold text-sm mb-4 text-white">
+        <img src="images/Clock (2).png" alt="" class="w-5 h-5 opacity-80 invert"/> Operational Times
+      </div>
+      <div class="space-y-1.5 text-xs text-gray-400">
+        <div class="flex justify-between"><span class="font-semibold text-white">Monday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-white">Tuesday:</span><span>8:02 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-white">Wednesday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-white">Thursday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-white">Friday:</span><span>8:00 AM–3:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-white">Saturday:</span><span>8:00 AM–2:00 AM</span></div>
+        <div class="flex justify-between"><span class="font-semibold text-white">Sunday:</span><span>8:00 AM–3:00 AM</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KNOW MORE ABOUT US -->
+  <div class="bg-white rounded-2xl p-7 mb-8 shadow-md">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <h2 class="nunito font-black text-xl text-gray-900">Know more about us!</h2>
+      <div class="flex gap-1 bg-gray-100 rounded-full p-1">
+        <button class="know-tab bg-white text-gray-900 shadow-sm text-xs font-semibold px-4 py-1.5 rounded-full transition-all" onclick="switchTab(this)">Frequent Questions</button>
+        <button class="know-tab text-gray-500 text-xs font-semibold px-4 py-1.5 rounded-full transition-all hover:bg-white/60" onclick="switchTab(this)">Who are we?</button>
+        <button class="know-tab text-gray-500 text-xs font-semibold px-4 py-1.5 rounded-full transition-all hover:bg-white/60" onclick="switchTab(this)">Partner Program</button>
+        <button class="know-tab text-gray-500 text-xs font-semibold px-4 py-1.5 rounded-full transition-all hover:bg-white/60" onclick="switchTab(this)">Help &amp; Support</button>
+      </div>
+    </div>
+    <div class="bg-navy rounded-2xl p-6 flex flex-col md:flex-row gap-6">
+      <div id="faq-list" class="flex flex-col gap-2 md:w-52 w-full flex-shrink-0"></div>
+      <div class="flex-1">
+        <div id="steps-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+        <p id="know-desc" class="text-xs text-gray-400 leading-relaxed mt-4 pt-4 border-t border-white/10"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMER REVIEWS -->
+  <div class="py-6 pb-5">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="nunito text-2xl font-black text-gray-900">Customer Reviews</h2>
+      <div class="flex gap-2">
+        <button onclick="slideRev(-1)" class="w-9 h-9 rounded-full bg-orange text-white flex items-center justify-center text-base font-bold hover:bg-orange-dark transition-colors shadow-sm">&#8592;</button>
+        <button onclick="slideRev(1)"  class="w-9 h-9 rounded-full bg-orange text-white flex items-center justify-center text-base font-bold hover:bg-orange-dark transition-colors shadow-sm">&#8594;</button>
+      </div>
+    </div>
+    <div class="overflow-hidden w-full">
+      <div id="rev-track" class="rev-track"></div>
+    </div>
+    <div class="text-center mt-8 mb-4">
+      <div class="nunito text-4xl font-black text-gray-900">3.4</div>
+      <div class="text-amber text-xl mt-1">★★★★☆</div>
+      <div class="text-gray-400 text-xs mt-1">1,360 reviews</div>
+    </div>
+  </div>
+
+  <!-- SIMILAR RESTAURANTS -->
+  <div class="pb-10">
+    <h2 class="nunito text-2xl font-black text-gray-900 mb-5">Similar Restaurants</h2>
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+
+      <div class="flex flex-col items-center gap-2 cursor-pointer group">
+        <div class="w-full aspect-square rounded-2xl overflow-hidden shadow-sm group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+          <img src="images/Group 16.png" alt="McDonald's London" class="w-full h-full object-cover"/>
+        </div>
+        <p class="text-xs font-semibold text-gray-700 text-center leading-tight">McDonald's London</p>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 cursor-pointer group">
+        <div class="w-full aspect-square rounded-2xl overflow-hidden shadow-sm group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+          <img src="images/Group 17.png" alt="Papa Johns" class="w-full h-full object-cover"/>
+        </div>
+        <p class="text-xs font-semibold text-gray-700 text-center leading-tight">Papa Johns</p>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 cursor-pointer group">
+        <div class="w-full aspect-square rounded-2xl overflow-hidden shadow-sm group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+          <img src="images/Group 18.png" alt="KFC West London" class="w-full h-full object-cover"/>
+        </div>
+        <p class="text-xs font-semibold text-gray-700 text-center leading-tight">KFC West London</p>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 cursor-pointer group">
+        <div class="w-full aspect-square rounded-2xl overflow-hidden shadow-sm group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+          <img src="images/Group 19.png" alt="Texas Chicken" class="w-full h-full object-cover"/>
+        </div>
+        <p class="text-xs font-semibold text-gray-700 text-center leading-tight">Texas Chicken</p>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 cursor-pointer group">
+        <div class="w-full aspect-square rounded-2xl overflow-hidden shadow-sm group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+          <img src="images/Group 20.png" alt="Burger King" class="w-full h-full object-cover"/>
+        </div>
+        <p class="text-xs font-semibold text-gray-700 text-center leading-tight">Burger King</p>
+      </div>
+
+      <div class="flex flex-col items-center gap-2 cursor-pointer group">
+        <div class="w-full aspect-square rounded-2xl overflow-hidden shadow-sm group-hover:-translate-y-1 group-hover:shadow-md transition-all">
+          <img src="images/Group 21.png" alt="Shaurma 1" class="w-full h-full object-cover"/>
+        </div>
+        <p class="text-xs font-semibold text-gray-700 text-center leading-tight">Shaurma 1</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-gray-100 pt-10 pb-0">
+  <div class="max-w-6xl mx-auto px-6 pb-10 grid grid-cols-1 md:grid-cols-4 gap-8 border-b border-gray-300">
+    <div class="flex flex-col gap-4">
+      <img src="images/LOGO 2.png" alt="Order" class="h-8 w-auto object-contain"/>
+      <div class="flex gap-2 mt-1">
+        <img src="images/Vector.png" alt="App Store" class="h-9 w-auto object-contain"/>
+        <img src="images/Group.png" alt="Google Play" class="h-9 w-auto object-contain"/>
+      </div>
+      <p class="text-gray-500 text-xs leading-relaxed mt-1">Company # 490038-445, Registered with<br/>House of companies.</p>
+    </div>
+    <div class="flex flex-col gap-3">
+      <h4 class="font-bold text-gray-900 text-sm">Get Exclusive Deals in your Inbox</h4>
+      <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
+        <input type="email" placeholder="youremail@gmail.com" class="flex-1 px-3 py-2 text-xs text-gray-600 outline-none bg-transparent"/>
+        <button class="bg-orange hover:bg-orange-dark text-white text-xs font-bold px-4 py-2 transition-colors">Subscribe</button>
+      </div>
+      <p class="text-gray-400 text-xs">we wont spam, read our email policy</p>
+      <div class="flex gap-3 mt-1">
+        <a href="#" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-orange flex items-center justify-center transition-colors group">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+        </a>
+        <a href="#" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-orange flex items-center justify-center transition-colors group">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+        </a>
+        <a href="#" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-orange flex items-center justify-center transition-colors group">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.77 1.52V6.75a4.85 4.85 0 01-1-.06z"/></svg>
+        </a>
+        <a href="#" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-orange flex items-center justify-center transition-colors group">
+          <svg class="w-4 h-4 text-gray-600 group-hover:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.5 2 6 4.5 6 8v.5c-.5.1-1.5.4-1.5 1.1 0 .6.8.9 1.3 1 .1.4.2.8.4 1.1C4.8 12.5 3 13.5 3 14.5c0 .3.3.5.6.6 1 .2 1.8.5 2.4 1.1.2.2.3.6.1.9-.2.4-.3.7-.3.9 0 .5.5.8 1 .8.3 0 .6-.1.9-.2.5-.2 1-.3 1.5-.1.4.1.7.4 1 .7.5.5 1.1.8 1.8.8s1.3-.3 1.8-.8c.3-.3.6-.6 1-.7.5-.2 1-.1 1.5.1.3.1.6.2.9.2.5 0 1-.3 1-.8 0-.2-.1-.5-.3-.9-.2-.3-.1-.7.1-.9.6-.6 1.4-.9 2.4-1.1.3-.1.6-.3.6-.6 0-1-1.8-2-3.2-2.8.2-.3.3-.7.4-1.1.5-.1 1.3-.4 1.3-1C19.5 9 18.5 8.6 18 8.5V8c0-3.5-2.5-6-6-6z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <h4 class="font-bold text-gray-900 text-sm mb-1">Legal Pages</h4>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Terms and conditions</a>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Privacy</a>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Cookies</a>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Modern Slavery Statement</a>
+    </div>
+    <div class="flex flex-col gap-2">
+      <h4 class="font-bold text-gray-900 text-sm mb-1">Important Links</h4>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Get help</a>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Add your restaurant</a>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Sign up to deliver</a>
+      <a href="#" class="text-gray-500 text-xs hover:text-orange transition-colors">Create a business account</a>
+    </div>
+  </div>
+  <div class="bg-gray-800">
+    <div class="max-w-6xl mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+      <p class="text-gray-400 text-xs">Order.uk Copyright 2025, All Rights Reserved.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-gray-400 text-xs hover:text-white transition-colors">Privacy Policy</a>
+        <a href="#" class="text-gray-400 text-xs hover:text-white transition-colors">Terms</a>
+        <a href="#" class="text-gray-400 text-xs hover:text-white transition-colors">Pricing</a>
+        <a href="#" class="text-gray-400 text-xs hover:text-white transition-colors">Do not sell or share my personal information</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const products = [
+  { id:1,  name:"Royal Cheese Burger with extra Fries", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium",  price:23.10, type:"burgers",    img:"images/Rectangle 46.png" },
+  { id:3,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"burgers",    img:"images/Rectangle 46 (4).png" },
+  { id:3,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"burgers",    img:"images/Rectangle 46 (4).png" },
+  { id:4,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"burgers",    img:"images/Rectangle 46 (5).png" },
+  { id:5,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"burgers",    img:"images/Rectangle 46 (6).png" },
+  { id:6,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"burgers",    img:"images/Rectangle 46 (7).png" },
+  { id:7,  name:"Royal Cheese Burger with extra Fries", desc:"1 Big Mac™, 1 Royal Cheeseburger, 3 medium", price:23.10, type:"fries",      img:"images/Rectangle 46 (8).png" },
+  { id:8,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"fries",      img:"images/Rectangle 46 (9).png" },
+  { id:9,  name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"fries",      img:"images/Rectangle 46 (10).png" },
+  { id:10, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"fries",      img:"images/Rectangle 46 (11).png" },
+  { id:11, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"fries",      img:"images/Rectangle 46 (12).png" },
+  { id:12, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"fries",      img:"images/Rectangle 46 (13).png" },
+  { id:13, name:"Royal Cheese Burger with extra Fries", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium", price:23.10, type:"cold_drinks", img:"images/Rectangle 46 (14).png" },
+  { id:14, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"cold_drinks", img:"images/Rectangle 46 (15).png" },
+  { id:15, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"cold_drinks", img:"images/Rectangle 46 (16).png" },
+  { id:16, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"cold_drinks", img:"images/Rectangle 46 (17).png" },
+  { id:17, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"cold_drinks", img:"images/Rectangle 46 (18).png" },
+  { id:18, name:"The classics for 3", desc:"1 McChicken™, 1 Big Mac™, 1 Royal Cheeseburger, 3 medium sized french fries, 3 cold drinks", price:23.10, type:"cold_drinks", img:"images/Rectangle 46 (19).png" },
+];
+
+const reviews = [
+  { name:"St Glx", location:"South London", date:"24th September, 2023", stars:4, avatar:"https://i.pravatar.cc/40?img=1",
+    text:"The positive aspect was undoubtedly the efficiency of the service. The queue moved quickly, the staff was friendly, and the food was up to the usual McDonald's standard — hot and satisfying." },
+  { name:"St Glx", location:"South London", date:"24th September, 2023", stars:4, avatar:"https://i.pravatar.cc/40?img=2",
+    text:"The positive aspect was undoubtedly the efficiency of the service. The queue moved quickly, the staff was friendly, and the food was up to the usual McDonald's standard — hot and satisfying." },
+  { name:"St Glx", location:"South London", date:"24th September, 2023", stars:4, avatar:"https://i.pravatar.cc/40?img=3",
+    text:"The positive aspect was undoubtedly the efficiency of the service. The queue moved quickly, the staff was friendly, and the food was up to the usual McDonald's standard — hot and satisfying." },
+  { name:"St Glx", location:"South London", date:"24th September, 2023", stars:5, avatar:"https://i.pravatar.cc/40?img=4",
+    text:"Amazing experience! Staff were super helpful and the food arrived piping hot. Will definitely order again from this location." },
+  { name:"St Glx", location:"South London", date:"24th September, 2023", stars:3, avatar:"https://i.pravatar.cc/40?img=5",
+    text:"Decent overall. The food quality was fine but delivery took a little longer than expected. Would order again on a quieter day." },
+];
+
+const faqData = [
+  { q:"How does Order.UK work?",
+    steps:[
+      { icon:"images/order-food 1.png", title:"Place an Order!",  desc:"Place order through our website or Mobile app" },
+      { icon:"images/food 1.png",       title:"Track Progress",   desc:"You can track your order status with delivery time" },
+      { icon:"images/order 1.png",      title:"Get your Order!",  desc:"Receive your order at a lightning fast speed!" },
+    ], desc:"Order.UK simplifies the food ordering process. Browse through our diverse menu, select your favorite dishes, and proceed to checkout. Your delicious meal will be on its way to your doorstep in no time!" },
+  { q:"What payment methods are accepted?",
+    steps:[
+      { icon:"https://cdn-icons-png.flaticon.com/512/633/633611.png",   title:"Credit / Debit Card", desc:"Visa, Mastercard and Amex accepted" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/888/888857.png",   title:"Digital Wallets",     desc:"Apple Pay, Google Pay, PayPal" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/2489/2489756.png", title:"Cash on Delivery",    desc:"Pay when your order arrives" },
+    ], desc:"We accept all major payment methods including credit/debit cards, digital wallets and cash on delivery for your convenience." },
+  { q:"Can I track my order in real-time?",
+    steps:[
+      { icon:"https://cdn-icons-png.flaticon.com/512/2769/2769339.png", title:"Live Tracking", desc:"Real-time GPS tracking of your order" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/597/597177.png",   title:"SMS Updates",  desc:"Get notified at every stage" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/3595/3595455.png", title:"ETA Updates",  desc:"Accurate estimated delivery time" },
+    ], desc:"Yes! You can track your order in real-time through the app or website. You'll receive live GPS updates and SMS notifications at every stage." },
+  { q:"Are there any special discounts?",
+    steps:[
+      { icon:"https://cdn-icons-png.flaticon.com/512/1029/1029183.png", title:"Daily Deals",       desc:"Special offers every day" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/1940/1940611.png", title:"Loyalty Rewards",   desc:"Earn points with every order" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/2088/2088617.png", title:"First Order Offer", desc:"20% off with code FIRST20" },
+    ], desc:"We have daily deals, loyalty rewards, and special promotions. Check the Special Offers section or subscribe to our newsletter for exclusive discounts." },
+  { q:"Is Order.UK available in my area?",
+    steps:[
+      { icon:"https://cdn-icons-png.flaticon.com/512/535/535239.png",   title:"Coverage Map",   desc:"Check our map on the app" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/1048/1048953.png", title:"Expanding Fast", desc:"New areas added every week" },
+      { icon:"https://cdn-icons-png.flaticon.com/512/597/597177.png",   title:"Contact Us",     desc:"Request your area to be added" },
+    ], desc:"Order.UK currently covers major UK cities including London, Manchester, Birmingham and more. We're expanding rapidly — enter your postcode on the app to check." },
+];
+
+/* ─── STATE ─────────────────────────────────────────── */
+let cart={}, currentCat='all', searchQ='', revIdx=0, activeFaq=0;
+const typeLabel={burgers:"Burgers",fries:"Fries",snacks:"Snacks",salads:"Salads",cold_drinks:"Cold Drinks",happy_meal:"Happy Meal®",desserts:"Desserts",hot_drinks:"Hot Drinks",sauces:"Sauces",orbit:"Orbit®"};
+
+/* ─── PRODUCTS ──────────────────────────────────────── */
+function renderProducts(){
+  const container=document.getElementById('products-container');
+  const filtered=products.filter(p=>{
+    const mc=currentCat==='all'||p.type===currentCat;
+    const ms=p.name.toLowerCase().includes(searchQ)||p.desc.toLowerCase().includes(searchQ);
+    return mc&&ms;
+  });
+  if(!filtered.length){container.innerHTML='<p class="text-gray-400 py-6">No items found.</p>';return;}
+  let html='';
+  if(currentCat==='all'){
+    const groups={};
+    filtered.forEach(p=>{if(!groups[p.type])groups[p.type]=[];groups[p.type].push(p);});
+    for(const[type,items]of Object.entries(groups)){
+      html+=`<h2 class="nunito text-xl font-black text-orange mt-5 mb-3">${typeLabel[type]||type}</h2>`;
+      html+=`<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">${items.map(cardHTML).join('')}</div>`;
+    }
+  }else{
+    html+=`<h2 class="nunito text-xl font-black text-orange mt-2 mb-3">${typeLabel[currentCat]||currentCat}</h2>`;
+    html+=`<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">${filtered.map(cardHTML).join('')}</div>`;
+  }
+  container.innerHTML=html;
+}
+
+function cardHTML(p){return`
+  <div id="pcard-${p.id}" class="bg-white rounded-xl overflow-hidden shadow-sm border-2 border-transparent hover:border-orange hover:shadow-md transition-all flex min-h-[118px] cursor-pointer">
+    <div class="flex-1 p-3 flex flex-col justify-between">
+      <div><p class="font-bold text-xs text-gray-900 leading-snug mb-1">${p.name}</p><p class="text-gray-400 text-xs leading-relaxed">${p.desc}</p></div>
+      <p class="font-black text-xs text-gray-800 mt-2">GBP ${p.price.toFixed(2)}</p>
+    </div>
+    <div class="w-28 flex-shrink-0 relative bg-amber-300 rounded-r-xl overflow-hidden">
+      <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover"/>
+      <button onclick="event.stopPropagation();addToCart(${p.id})"
+        class="absolute bottom-2 right-2 w-7 h-7 bg-gray-900 text-white rounded-full text-base font-bold flex items-center justify-center hover:bg-orange transition-colors shadow-md z-10">+</button>
+    </div>
+  </div>`;}
+
+function filterCat(cat,btn){
+  currentCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>{b.classList.remove('bg-white','text-orange');b.classList.add('text-white/80');});
+  btn.classList.add('bg-white','text-orange');btn.classList.remove('text-white/80');
+  renderProducts();
+}
+function searchProducts(){searchQ=document.getElementById('search-input').value.toLowerCase();renderProducts();}
+
+/* ─── CART ──────────────────────────────────────────── */
+function addToCart(id){
+  cart[id]=(cart[id]||0)+1;
+  updateBadge();
+  const card=document.getElementById('pcard-'+id);
+  if(card){card.classList.add('border-green-500');setTimeout(()=>card.classList.remove('border-green-500'),600);}
+}
+function removeFromCart(id){if(cart[id]>1)cart[id]--;else delete cart[id];updateBadge();renderCartPanel();}
+function updateBadge(){document.getElementById('cart-count').textContent=Object.values(cart).reduce((a,b)=>a+b,0);}
+
+function toggleCart(){
+  const ov=document.getElementById('cart-overlay');
+  const isHidden=ov.classList.contains('hidden');
+  if(isHidden){ov.classList.remove('hidden');ov.classList.add('flex');renderCartPanel();}
+  else{ov.classList.add('hidden');ov.classList.remove('flex');}
+}
+function outsideClose(e){if(e.target===document.getElementById('cart-overlay'))toggleCart();}
+
+function renderCartPanel(){
+  const wrap=document.getElementById('cart-items-wrap');
+  const footer=document.getElementById('cp-footer');
+  const keys=Object.keys(cart);
+  if(!keys.length){
+    wrap.innerHTML='<p class="text-gray-400 text-center py-12 text-sm">🛒 Your cart is empty.<br/>Add something delicious!</p>';
+    footer.classList.add('hidden');return;
+  }
+  let total=0;
+  wrap.innerHTML=keys.map(id=>{
+    const p=products.find(x=>x.id==id);const qty=cart[id];total+=p.price*qty;
+    return`<div class="flex items-center gap-3 py-3 border-b border-gray-100">
+      <img src="${p.img}" alt="${p.name}" class="w-12 h-12 rounded-lg object-cover bg-gray-100 flex-shrink-0"/>
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-xs text-gray-800 truncate">${p.name}</p>
+        <p class="text-orange font-bold text-xs mt-0.5">£${(p.price*qty).toFixed(2)}</p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button onclick="removeFromCart(${id})" class="w-6 h-6 bg-orange text-white rounded-full text-sm font-bold flex items-center justify-center hover:bg-orange-dark">−</button>
+        <span class="text-xs font-bold w-4 text-center">${qty}</span>
+        <button onclick="addToCart(${id});renderCartPanel()" class="w-6 h-6 bg-orange text-white rounded-full text-sm font-bold flex items-center justify-center hover:bg-orange-dark">+</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('cart-total').textContent='£'+total.toFixed(2);
+  footer.classList.remove('hidden');
+}
+
+/* ─── REVIEWS ───────────────────────────────────────── */
+function renderReviews(){
+  document.getElementById('rev-track').innerHTML=reviews.map(r=>`
+    <div class="bg-white rounded-xl p-4 shadow-sm flex-shrink-0 flex flex-col gap-2 border border-gray-100"
+         style="width:calc(33.333% - 11px); min-width:calc(33.333% - 11px);">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <img src="${r.avatar}" alt="${r.name}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200"/>
+          <div class="min-w-0">
+            <p class="font-bold text-xs text-gray-900 truncate">${r.name}</p>
+            <p class="text-gray-400 text-xs truncate">📍 ${r.location}</p>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <p class="text-gray-400 text-xs whitespace-nowrap">${r.date}</p>
+          <p class="text-amber text-xs mt-0.5">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</p>
+        </div>
+      </div>
+      <p class="text-gray-500 text-xs leading-relaxed">${r.text}</p>
+    </div>`).join('');
+}
+
+function slideRev(dir){
+  const max=Math.max(0,reviews.length-3);
+  revIdx=Math.max(0,Math.min(max,revIdx+dir));
+  const track=document.getElementById('rev-track');
+  const card=track.firstElementChild;
+  if(!card)return;
+  track.style.transform=`translateX(-${(card.offsetWidth+16)*revIdx}px)`;
+}
+setInterval(()=>{
+  const track=document.getElementById('rev-track');
+  const card=track.firstElementChild;
+  if(!card)return;
+  revIdx=(revIdx+1)%Math.max(1,reviews.length-2);
+  track.style.transform=`translateX(-${(card.offsetWidth+16)*revIdx}px)`;
+},5000);
+
+/* ─── FAQ ────────────────────────────────────────────── */
+function renderFaqList(){
+  document.getElementById('faq-list').innerHTML=faqData.map((f,i)=>`
+    <div onclick="setFaq(${i})" class="px-4 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${i===activeFaq?'bg-orange text-white':'text-gray-300 hover:bg-white/10 hover:text-white'}">
+      ${f.q}
+    </div>`).join('');
+}
+function renderFaqSteps(){
+  const d=faqData[activeFaq];
+  document.getElementById('steps-grid').innerHTML=d.steps.map(s=>`
+    <div class="bg-gray-100 rounded-xl p-4 flex flex-col gap-2">
+      <img src="${s.icon}" alt="${s.title}" class="w-12 h-12 object-contain"/>
+      <p class="font-bold text-xs text-gray-900">${s.title}</p>
+      <p class="text-xs text-gray-500 leading-relaxed">${s.desc}</p>
+    </div>`).join('');
+  document.getElementById('know-desc').textContent=d.desc;
+}
+function setFaq(idx){activeFaq=idx;renderFaqList();renderFaqSteps();}
+function switchTab(btn){
+  document.querySelectorAll('.know-tab').forEach(b=>{b.classList.remove('bg-white','text-gray-900','shadow-sm');b.classList.add('text-gray-500');});
+  btn.classList.add('bg-white','text-gray-900','shadow-sm');btn.classList.remove('text-gray-500');
+}
+
+/* ─── INIT ───────────────────────────────────────────── */
+renderProducts();
+renderReviews();
+renderFaqList();
+renderFaqSteps();
+// NOTE: renderSimilar() intentionally removed — similar restaurants use static HTML img tags
+</script>
+</body>
+</html>
